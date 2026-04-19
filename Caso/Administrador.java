@@ -18,8 +18,31 @@ public class Administrador implements Runnable {
 
     @Override
     public void run() {
-        // TODO: Consumir alertas hasta recibir FIN.
-        // Regla: genera r en [0..20]. Si r % 4 == 0 -> evento normal a clasificacion; si no, descartar.
-        // TODO: Cuando llegue FIN, enviar 'cantidadClasificadores' eventos FIN a clasificacion.
+        while (true) {
+            Evento alerta = buzonAlertas.take();
+            if (alerta == null) {
+                break;
+            }
+
+            if (alerta.esFin()) {
+                for (int i = 0; i < cantidadClasificadores; i++) {
+                    buzonClasificacion.put(Evento.fin());
+                }
+                System.out.println("[Administrador] Recibio FIN y envio "
+                    + cantidadClasificadores + " FIN a clasificadores.");
+                break;
+            }
+
+            int r = random.nextInt(21);
+            if (r % 4 == 0) {
+                Evento normal = alerta.comoNormal();
+                buzonClasificacion.put(normal);
+                System.out.println("[Administrador] Alerta liberada " + normal + " (r=" + r + ")");
+            } else {
+                System.out.println("[Administrador] Alerta descartada " + alerta + " (r=" + r + ")");
+            }
+        }
+
+        System.out.println("[Administrador] Termino.");
     }
 }

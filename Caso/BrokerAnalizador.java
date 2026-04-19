@@ -21,9 +21,30 @@ public class BrokerAnalizador implements Runnable {
 
     @Override
     public void run() {
-        // TODO: Procesa exactamente 'totalEsperado' eventos del buzon de entrada.
-        // Regla: genera r en [0..200]. Si r % 8 == 0 -> ALERTA; si no -> NORMAL.
-        // TODO: Envia cada evento al buzon correspondiente.
-        // TODO: Al terminar, envia un FIN al administrador por buzonAlertas.
+        for (int i = 0; i < totalEsperado; i++) {
+            Evento evento = buzonEntrada.take();
+            if (evento == null) {
+                break;
+            }
+
+            int r = random.nextInt(201);
+            if (r % 8 == 0) {
+                Evento alerta = Evento.alerta(
+                    evento.getId(),
+                    evento.getSensorId(),
+                    evento.getCategoria(),
+                    evento.getDestinoServidor()
+                );
+                buzonAlertas.put(alerta);
+                System.out.println("[Broker] ALERTA " + alerta + " (r=" + r + ")");
+            } else {
+                Evento normal = evento.comoNormal();
+                buzonClasificacion.put(normal);
+                System.out.println("[Broker] NORMAL " + normal + " (r=" + r + ")");
+            }
+        }
+
+        buzonAlertas.put(Evento.fin());
+        System.out.println("[Broker] Termino y envio FIN al administrador.");
     }
 }

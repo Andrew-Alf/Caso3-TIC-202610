@@ -23,9 +23,16 @@ public class Sensor implements Runnable {
 
     @Override
     public void run() {
-        // TODO: Genera 'cantidadEventos' eventos.
-        // Pista: id global, codigo en [1..numeroServidores], destinoServidor segun codigo.
-        // TODO: Deposita cada evento en buzonEntrada.
-        // TODO: Registra en consola cuando termine el sensor.
+        for (int i = 0; i < cantidadEventos; i++) {
+            long id = secuenciaGlobal.incrementAndGet();
+            int codigo = random.nextInt(numeroServidores) + 1;
+            int destinoServidor = codigo - 1;
+
+            Evento evento = Evento.normal(id, sensorId, codigo, destinoServidor);
+            buzonEntrada.put(evento);
+            System.out.println("[Sensor " + sensorId + "] Genero " + evento);
+        }
+
+        System.out.println("[Sensor " + sensorId + "] Termino. Eventos generados: " + cantidadEventos);
     }
 }

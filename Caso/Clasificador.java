@@ -45,12 +45,12 @@ public class Clasificador implements Runnable {
                 break;
             }
 
-            // TODO: Completar regla de enrutamiento si necesitas validaciones adicionales.
             int destino = evento.getDestinoServidor();
             if (destino < 0 || destino >= buzonesServidores.size()) {
                 destino = Math.floorMod(destino, buzonesServidores.size());
             }
             buzonesServidores.get(destino).put(evento);
+            System.out.println("[Clasificador " + id + "] Envio " + evento + " a servidor " + destino);
         }
 
         System.out.println("[Clasificador " + id + "] Termino.");
