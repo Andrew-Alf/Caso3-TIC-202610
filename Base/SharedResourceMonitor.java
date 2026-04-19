@@ -1,3 +1,4 @@
+package Base;
 public class SharedResourceMonitor {
     private int item;
     private int counter = 0; // 0 = empty, 1 = full
