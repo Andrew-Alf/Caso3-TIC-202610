@@ -14,8 +14,31 @@ public class ServidorConsolidacion implements Runnable {
 
     @Override
     public void run() {
-        // TODO: Consumir eventos del buzon del servidor.
-        // TODO: Si evento FIN -> terminar.
-        // TODO: Si es normal -> simular procesamiento entre 100 y 1000 ms.
+        System.out.println("[Servidor " + id + "] Iniciado.");
+
+        while (true) {
+            try {
+                Evento evento = buzon.take();
+
+                if (evento.esFin()) {
+                    System.out.println("[Servidor " + id + "] Recibio evento de fin. Terminando.");
+                    break;
+                }
+
+                int tiempoProcesamiento = 100 + random.nextInt(901);
+                System.out.println("[Servidor " + id + "] Procesando " + evento +
+                        " durante " + tiempoProcesamiento + "ms.");
+                Thread.sleep(tiempoProcesamiento);
+
+                System.out.println("[Servidor " + id + "] Termino de procesar " + evento);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("[Servidor " + id + "] Interrumpido.");
+                break;
+            }
+        }
+
+        System.out.println("[Servidor " + id + "] Buzón final size: " + buzon.size());
     }
 }
