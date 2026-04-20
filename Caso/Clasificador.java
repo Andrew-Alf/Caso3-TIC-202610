@@ -25,22 +25,35 @@ public class Clasificador implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Evento evento = buzonClasificacion.take();
-            if (evento == null) {
+            Evento evento;
+            try {
+                evento = buzonClasificacion.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("[Clasificador " + id + "] Interrumpido esperando evento.");
                 break;
             }
+
+            if (evento == null) break;
 
             if (evento.esFin()) {
                 int actual = clasificadoresTerminados.incrementAndGet();
                 System.out.println("[Clasificador " + id + "] Recibio FIN ("
-                    + actual + "/" + totalClasificadores + ")");
+                        + actual + "/" + totalClasificadores + ")");
 
                 if (actual == totalClasificadores) {
                     for (BuzonMonitor<Evento> buzonServidor : buzonesServidores) {
-                        buzonServidor.put(Evento.fin());
+                        try {
+                            buzonServidor.put(Evento.fin());
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            System.out.println("[Clasificador " + id
+                                    + "] Interrumpido enviando FIN a servidores.");
+                            break;
+                        }
                     }
                     System.out.println("[Clasificador " + id
-                        + "] Fue el ultimo y envio FIN a servidores.");
+                            + "] Fue el ultimo y envio FIN a servidores.");
                 }
                 break;
             }
@@ -49,8 +62,16 @@ public class Clasificador implements Runnable {
             if (destino < 0 || destino >= buzonesServidores.size()) {
                 destino = Math.floorMod(destino, buzonesServidores.size());
             }
-            buzonesServidores.get(destino).put(evento);
-            System.out.println("[Clasificador " + id + "] Envio " + evento + " a servidor " + destino);
+
+            try {
+                buzonesServidores.get(destino).put(evento);
+                System.out.println("[Clasificador " + id + "] Envio " + evento
+                        + " a servidor " + destino);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("[Clasificador " + id + "] Interrumpido enviando a servidor.");
+                break;
+            }
         }
 
         System.out.println("[Clasificador " + id + "] Termino.");
