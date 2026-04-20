@@ -5,22 +5,34 @@ import java.util.Queue;
 
 public class BuzonMonitor<T> {
     private final Queue<T> cola = new LinkedList<>();
-    private final int capacidad;
+    private final int capacidad; 
 
     public BuzonMonitor(int capacidad) {
         this.capacidad = capacidad;
     }
 
-    public synchronized void put(T item) {
-        // TODO: Implementa espera cuando el buzon este lleno (si capacidad > 0).
-        // TODO: Inserta el item y notifica a consumidores.
-        throw new UnsupportedOperationException("TODO: implementar put");
+    //Aquí importante en el momento de hacer las pruebas poner capacidad -1 para simular que es ilimitada 
+    public synchronized void put(T item) throws InterruptedException {
+        while (capacidad > 0 && cola.size() >= capacidad) {
+            wait();
+        }
+        cola.add(item);
+        //importante aqui notifyAll y no notify para evitar un posible bloqueo infinito
+        notifyAll(); 
     }
 
-    public synchronized T take() {
-        // TODO: Implementa espera cuando el buzon este vacio.
-        // TODO: Retira un item y notifica a productores.
-        throw new UnsupportedOperationException("TODO: implementar take");
+    public synchronized T take() throws InterruptedException {
+        while (cola.isEmpty()) {
+            try {
+                System.out.println("[Monitor] Buffer empty, consumer waiting...");
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        T item = cola.poll();
+        notifyAll();
+        return item;
     }
 
     public synchronized int size() {

@@ -29,8 +29,12 @@ public class Sensor implements Runnable {
             int destinoServidor = codigo - 1;
 
             Evento evento = Evento.normal(id, sensorId, codigo, destinoServidor);
-            buzonEntrada.put(evento);
-            System.out.println("[Sensor " + sensorId + "] Genero " + evento);
+            try {
+                buzonEntrada.put(evento);
+                System.out.println("[Sensor " + sensorId + "] Genero " + evento);
+            } catch (InterruptedException e) {
+            }
+            
         }
 
         System.out.println("[Sensor " + sensorId + "] Termino. Eventos generados: " + cantidadEventos);
