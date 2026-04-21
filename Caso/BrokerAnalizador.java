@@ -22,8 +22,11 @@ public class BrokerAnalizador implements Runnable {
     @Override
     public void run() {
         for (int i = 0; i < totalEsperado; i++) {
-            Evento evento = buzonEntrada.take();
-            if (evento == null) {
+            Evento evento;
+            try {
+                evento = buzonEntrada.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 break;
             }
 
@@ -35,16 +38,30 @@ public class BrokerAnalizador implements Runnable {
                     evento.getCategoria(),
                     evento.getDestinoServidor()
                 );
-                buzonAlertas.put(alerta);
+                try {
+                    buzonAlertas.put(alerta);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
                 System.out.println("[Broker] ALERTA " + alerta + " (r=" + r + ")");
             } else {
                 Evento normal = evento.comoNormal();
-                buzonClasificacion.put(normal);
+                try {
+                    buzonClasificacion.put(normal);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
                 System.out.println("[Broker] NORMAL " + normal + " (r=" + r + ")");
             }
         }
 
-        buzonAlertas.put(Evento.fin());
-        System.out.println("[Broker] Termino y envio FIN al administrador.");
+        try {
+            buzonAlertas.put(Evento.fin());
+            System.out.println("[Broker] Termino y envio FIN al administrador.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

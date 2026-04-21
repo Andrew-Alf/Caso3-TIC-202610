@@ -19,14 +19,22 @@ public class Administrador implements Runnable {
     @Override
     public void run() {
         while (true) {
-            Evento alerta = buzonAlertas.take();
-            if (alerta == null) {
+            Evento alerta;
+            try {
+                alerta = buzonAlertas.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 break;
             }
 
             if (alerta.esFin()) {
                 for (int i = 0; i < cantidadClasificadores; i++) {
-                    buzonClasificacion.put(Evento.fin());
+                    try {
+                        buzonClasificacion.put(Evento.fin());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
                 System.out.println("[Administrador] Recibio FIN y envio "
                     + cantidadClasificadores + " FIN a clasificadores.");
@@ -36,7 +44,12 @@ public class Administrador implements Runnable {
             int r = random.nextInt(21);
             if (r % 4 == 0) {
                 Evento normal = alerta.comoNormal();
-                buzonClasificacion.put(normal);
+                try {
+                    buzonClasificacion.put(normal);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
                 System.out.println("[Administrador] Alerta liberada " + normal + " (r=" + r + ")");
             } else {
                 System.out.println("[Administrador] Alerta descartada " + alerta + " (r=" + r + ")");

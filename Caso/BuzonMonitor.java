@@ -23,12 +23,8 @@ public class BuzonMonitor<T> {
 
     public synchronized T take() throws InterruptedException {
         while (cola.isEmpty()) {
-            try {
-                System.out.println("[Monitor] Buffer empty, consumer waiting...");
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            System.out.println("[Monitor] Buffer empty, consumer waiting...");
+            wait();
         }
         T item = cola.poll();
         notifyAll();

@@ -33,8 +33,10 @@ public class Sensor implements Runnable {
                 buzonEntrada.put(evento);
                 System.out.println("[Sensor " + sensorId + "] Genero " + evento);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("[Sensor " + sensorId + "] Interrumpido durante produccion.");
+                break;
             }
-            
         }
 
         System.out.println("[Sensor " + sensorId + "] Termino. Eventos generados: " + cantidadEventos);
