@@ -1,5 +1,5 @@
 package Caso;
-
+//a
 import java.util.Random;
 
 public class Administrador implements Runnable {
